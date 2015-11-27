@@ -21,17 +21,17 @@ PhilipsHue.prototype.areLightsOn = function (groupName, callback) {
   var lights = this.groups[groupName]
   if (!lights) return callback(new Error('No light group with name:' + groupName))
 
-  var isOn = false
-  async.each(lights
+  var lightStatusError = false
+  async.everyLimit(lights
+  , 1
   , function (lightId, eachCb) {
       this.api.lightStatus(lightId, function (error, response) {
-        if (error) return eachCb(error)
-        isOn = response.state.on
-        eachCb()
+        if (error) lightStatusError = error
+        eachCb(response.state.on)
       })
     }.bind(this)
-  , function (error) {
-      if (error) return callback(error)
+  , function (isOn) {
+      if (lightStatusError) return callback(lightStatusError)
       callback(null, isOn)
     }
   )
@@ -69,7 +69,7 @@ PhilipsHue.prototype.flashColour = function (groupName, color, callback) {
     , alertState = lightState.create().on().brightness(100).rgb(color).shortAlert()
 
   function getOriginalStates(cb) {
-    async.each(lights
+    async.eachSeries(lights
     , function (lightId, eachCb) {
         this.api.lightStatus(lightId, function (error, response) {
           if (error) return cb(error)
@@ -84,7 +84,8 @@ PhilipsHue.prototype.flashColour = function (groupName, color, callback) {
   }
 
   function setAlertStates(cb) {
-    async.each(lights
+    async.eachLimit(lights
+    , 4
     , function (lightId, eachCb) {
         this.api.setLightState(lightId, alertState, eachCb)
       }.bind(this)
@@ -93,7 +94,8 @@ PhilipsHue.prototype.flashColour = function (groupName, color, callback) {
   }
 
   function setOriginalStates(cb) {
-    async.each(lights
+    async.eachLimit(lights
+    , 4
     , function (lightId, eachCb) {
         var state = originalStates[lightId]
         this.api.setLightState(lightId, state, eachCb)
