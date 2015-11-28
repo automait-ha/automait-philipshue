@@ -17,12 +17,21 @@ function PhilipsHue(automait, logger, config) {
   this.api = new HueApi(config.bridgeIp, config.username)
 }
 
-PhilipsHue.prototype.areLightsOn = function (groupName, callback) {
+PhilipsHue.prototype.areAnyLightsOn = function (groupName, callback) {
+  areLightsOn.call(this, 'someLimit', groupName, callback)
+}
+
+PhilipsHue.prototype.areAllLightsOn = function (groupName, callback) {
+  areLightsOn.call(this, 'everyLimit', groupName, callback)
+}
+
+function areLightsOn(fnName, groupName, callback) {
+  if (!fnName || !async[fnName]) throw new Error('fnName must be valid')
   var lights = this.groups[groupName]
   if (!lights) return callback(new Error('No light group with name:' + groupName))
 
   var lightStatusError = false
-  async.everyLimit(lights
+  async[fnName](lights
   , 1
   , function (lightId, eachCb) {
       this.api.lightStatus(lightId, function (error, response) {
