@@ -35,8 +35,11 @@ function areLightsOn(fnName, groupName, callback) {
   , 1
   , function (lightId, eachCb) {
       this.api.lightStatus(lightId, function (error, response) {
-        if (error) lightStatusError = error
-        eachCb(response.state.on)
+        if (error) {
+          lightStatusError = error
+          return eachCb()
+        }
+        eachCb(response.state && response.state.on)
       })
     }.bind(this)
   , function (isOn) {
