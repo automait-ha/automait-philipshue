@@ -58,7 +58,7 @@ PhilipsHue.prototype.setState = function (groupName, powerState, brightness, col
     state.on()
     if (color === 'white') {
       state.white(154, brightness)
-    } else {
+    } else if (brightness && color) {
       state.brightness(brightness).rgb(color)
     }
   } else {
