@@ -53,11 +53,14 @@ PhilipsHue.prototype.setState = function (groupName, powerState, brightness, col
   var lights = this.groups[groupName]
   if (!lights) return callback(new Error('No light group with name:' + groupName))
 
+  var colorMapping = { 'cool-white': 1, 'warm-white': 300 }
+
   var state = lightState.create()
   if (powerState) {
     state.on()
-    if (color && color === 'white') {
-      state.white(154, brightness)
+    var mappedColor = colorMapping[ color ]
+    if (color && mappedColor) {
+      state.white(mappedColor, brightness)
     } else if (color) {
       state.rgb(color)
     }
