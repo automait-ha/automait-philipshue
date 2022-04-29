@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "ISC",
   "dependencies": {
-    "async": "^1.5.0",
+    "async": "^2.6.4",
     "node-hue-api": "^1.2.1"
   }
 }
